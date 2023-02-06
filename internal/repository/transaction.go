@@ -11,6 +11,7 @@ import (
 
 type Transaction interface {
 	Operation(transaction domain.TransactionInput) error
+	History(accountID string) ([]domain.TransactionInput, error)
 	Delete(transaction domain.TransactionInput) error
 }
 
@@ -59,6 +60,46 @@ func (e *TransactionsRepo) Operation(transaction domain.TransactionInput) error 
 	}
 
 	return err
+}
+
+// Get transactions history for account from dynamodb
+func (e *TransactionsRepo) History(accountID string) ([]domain.TransactionInput, error) {
+	transactions, err := e.db.Query(&dynamodb.QueryInput{
+		TableName: aws.String(TABLE_TRANSACTIONS),
+		KeyConditions: map[string]*dynamodb.Condition{
+			"account_id": {
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String(accountID),
+					},
+				},
+			},
+		},
+	})
+
+	if err != nil {
+		util.HandleAWSError(err)
+	}
+
+	var history []domain.TransactionInput
+
+	for _, transaction := range transactions.Items {
+		amount, _ := strconv.ParseInt(*transaction["amount"].N, 10, 64)
+
+		history = append(history, domain.TransactionInput{
+			AccountID:       *transaction["account_id"].S,
+			Date:            *transaction["date"].S,
+			Amount:          amount,
+			Category:        *transaction["category"].S,
+			Description:     *transaction["description"].S,
+			PaymentMethod:   *transaction["payment_method"].S,
+			Currency:        *transaction["currency"].S,
+			TransactionType: domain.TransactionType(*transaction["transaction_type"].S),
+		})
+	}
+
+	return history, err
 }
 
 // Delete transaction from dynamodb

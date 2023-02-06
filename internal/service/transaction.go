@@ -7,6 +7,7 @@ import (
 
 type Transaction interface {
 	Operation(transaction domain.TransactionInput) error
+	History(accountID string) ([]domain.TransactionInput, error)
 	Delete(transaction domain.TransactionInput) error
 }
 
@@ -29,6 +30,10 @@ func (s *TransactionService) Operation(transaction domain.TransactionInput) erro
 		Currency:        transaction.Currency,
 		TransactionType: transaction.TransactionType,
 	})
+}
+
+func (s *TransactionService) History(accountID string) ([]domain.TransactionInput, error) {
+	return s.repo.History(accountID)
 }
 
 func (s *TransactionService) Delete(transaction domain.TransactionInput) error {

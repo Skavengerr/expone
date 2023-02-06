@@ -33,14 +33,14 @@ func (h *Handler) accountCreate(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) accountDelete(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		log.Println("deleteBook() error:", err)
+		log.Println("accountDelete() error:", err)
 		sendErrorResponse(w, http.StatusBadRequest, "Error: while getting id from request")
 
 		return
 	}
 
 	if id == "" {
-		log.Println("deleteBook() error: id is empty")
+		log.Println("accountDelete() error: id is empty")
 		sendErrorResponse(w, http.StatusBadRequest, "Error: Id should not be empty")
 
 		return
@@ -48,9 +48,9 @@ func (h *Handler) accountDelete(w http.ResponseWriter, r *http.Request) {
 
 	err = h.services.Account.Delete(id)
 	if err != nil {
-		log.Println("deleteBook() error:", err)
+		log.Println("accountDelete() error:", err)
 
-		sendErrorResponse(w, http.StatusInternalServerError, "Error: Error while deleting book")
+		sendErrorResponse(w, http.StatusInternalServerError, "Error: Error while deleting account")
 		return
 	}
 

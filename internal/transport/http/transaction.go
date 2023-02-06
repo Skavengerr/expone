@@ -14,17 +14,32 @@ import (
 func initTransactionRouter(transactionRouter *mux.Router, h *Handler) {
 	transactionRouter.HandleFunc("/", h.transactionGetHistory).Methods(http.MethodGet)
 	transactionRouter.HandleFunc("/add", h.transactionOperation).Methods(http.MethodPost)
+	transactionRouter.HandleFunc("/history", h.transactionGetHistory).Methods(http.MethodGet)
 	transactionRouter.HandleFunc("/{id:[0-9]+}", h.transactionDelete).Methods(http.MethodDelete)
 }
 
-// Get transaction history from dynamodb
+// getTransactionHistory returns transaction history for account
 func (h *Handler) transactionGetHistory(w http.ResponseWriter, r *http.Request) {
 	var transaction domain.TransactionInput
 	err := json.NewDecoder(r.Body).Decode(&transaction)
-	if err != nil {
-		fmt.Errorf("Error decoding transaction: %v", err)
+	if transaction.AccountID == "" {
+		log.Println("getTransactionHistory() error: id is empty")
+		sendErrorResponse(w, http.StatusBadRequest, "Error: Id should not be empty")
+
 		return
 	}
+
+	transactionHistory, err := h.services.Transaction.History(transaction.AccountID)
+	if err != nil {
+		log.Println("getTransactionHistory() error:", err)
+		sendErrorResponse(w, http.StatusInternalServerError, "Error: Error while getting transaction history")
+
+		return
+	}
+
+	fmt.Println("transactionHistory", transactionHistory)
+
+	sendResponse(w, http.StatusOK, transactionHistory)
 }
 
 // Insert transaction to dynamodb
