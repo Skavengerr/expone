@@ -6,10 +6,19 @@ import (
 	"net/http"
 
 	"github.com/Skavengerr/expone/internal/domain"
+	"github.com/gorilla/mux"
 )
 
+// init expense router
+func initExpenseRouter(expenseRouter *mux.Router, h *Handler) {
+	expenseRouter.HandleFunc("/", h.expenseGetHistory).Methods(http.MethodGet)
+	expenseRouter.HandleFunc("/add", h.expenseInsert).Methods(http.MethodPost)
+	expenseRouter.HandleFunc("/{id:[0-9]+}", h.expenseUpdate).Methods(http.MethodPatch)
+	expenseRouter.HandleFunc("/{id:[0-9]+}", h.expenseDelete).Methods(http.MethodDelete)
+}
+
 // Get expense history from dynamodb
-func (h *Handler) GetHistory(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) expenseGetHistory(w http.ResponseWriter, r *http.Request) {
 	var expense domain.ExpenseInput
 	err := json.NewDecoder(r.Body).Decode(&expense)
 	if err != nil {
@@ -19,7 +28,7 @@ func (h *Handler) GetHistory(w http.ResponseWriter, r *http.Request) {
 }
 
 // Insert expense to dynamodb
-func (h *Handler) Insert(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) expenseInsert(w http.ResponseWriter, r *http.Request) {
 	var expense domain.ExpenseInput
 	err := json.NewDecoder(r.Body).Decode(&expense)
 	if err != nil {
@@ -31,7 +40,7 @@ func (h *Handler) Insert(w http.ResponseWriter, r *http.Request) {
 }
 
 // Update expense to dynamodb
-func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) expenseUpdate(w http.ResponseWriter, r *http.Request) {
 	var expense domain.ExpenseInput
 	err := json.NewDecoder(r.Body).Decode(&expense)
 	if err != nil {
@@ -43,7 +52,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // Delete expense to dynamodb
-func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) expenseDelete(w http.ResponseWriter, r *http.Request) {
 	var expense domain.ExpenseInput
 	err := json.NewDecoder(r.Body).Decode(&expense)
 	if err != nil {

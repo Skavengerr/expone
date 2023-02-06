@@ -9,6 +9,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
+type Expense interface {
+	Insert(expense domain.ExpenseInput) error
+	Update(expense domain.ExpenseInput) error
+	Delete(expense domain.ExpenseInput) error
+}
+
 type ExpensesRepo struct {
 	db *dynamodb.DynamoDB
 }
