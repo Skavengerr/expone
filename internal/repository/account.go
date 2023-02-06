@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/Skavengerr/expone/internal/domain"
@@ -12,7 +13,8 @@ import (
 type Account interface {
 	Create(account domain.AccountInput) error
 	Get(id string) string
-	Delete(id int64) error
+	UpdateBalance(accountID string, amount int64, transactionType domain.TransactionType) error
+	Delete(accountID string) error
 }
 
 type AccountRepo struct {
@@ -45,12 +47,12 @@ func (e *AccountRepo) Create(account domain.AccountInput) error {
 }
 
 // Get account from dynamodb
-func (e *AccountRepo) Get(id string) string {
+func (e *AccountRepo) Get(accountID string) string {
 	account, err := e.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(TABLE_ACCOUNTS),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account_id": {
-				S: aws.String(id),
+				S: aws.String(accountID),
 			},
 		},
 	})
@@ -64,18 +66,42 @@ func (e *AccountRepo) Get(id string) string {
 		return ""
 	}
 
-	accountID := account.Item["account_id"].S
+	id := account.Item["account_id"].S
 
-	return *accountID
+	return *id
+}
+
+// Update account's balance to dynamodb
+func (e *AccountRepo) UpdateBalance(accountID string, amount int64, transactionType domain.TransactionType) error {
+	_, err := e.db.UpdateItem(&dynamodb.UpdateItemInput{
+		TableName: aws.String(TABLE_ACCOUNTS),
+		Key: map[string]*dynamodb.AttributeValue{
+			"account_id": {
+				S: aws.String(accountID),
+			},
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":balance": {
+				N: aws.String(strconv.FormatInt(amount, 10)),
+			},
+		},
+		UpdateExpression: aws.String("SET balance = if_not_exists(balance, :balance) - :balance"),
+	})
+
+	if err != nil {
+		util.HandleAWSError(err)
+	}
+
+	return err
 }
 
 // Delete account from dynamodb
-func (e *AccountRepo) Delete(accountID int64) error {
+func (e *AccountRepo) Delete(accountID string) error {
 	_, err := e.db.DeleteItem(&dynamodb.DeleteItemInput{
 		TableName: aws.String(TABLE_ACCOUNTS),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account_id": {
-				S: aws.String(strconv.Itoa(int(accountID))),
+				S: aws.String(accountID),
 			},
 		},
 	})
@@ -85,4 +111,13 @@ func (e *AccountRepo) Delete(accountID int64) error {
 	}
 
 	return err
+}
+
+func getOperationDependsOnTransactionType(transactionType domain.TransactionType) string {
+	if transactionType == domain.TransactionTypeExpense {
+		return "-"
+	}
+	fmt.Println("transactionType: ", transactionType)
+
+	return "+"
 }

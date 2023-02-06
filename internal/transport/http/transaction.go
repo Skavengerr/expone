@@ -50,7 +50,16 @@ func (h *Handler) transactionOperation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.services.Transaction.Operation(transaction)
+	err = h.services.Transaction.Operation(transaction)
+	if err != nil {
+		log.Println("transactionOperation() error:", err)
+		sendErrorResponse(w, http.StatusInternalServerError, "Error: Error while inserting transaction")
+		return
+	}
+
+	h.services.Account.UpdateBalance(transaction.AccountID, transaction.Amount, transaction.TransactionType)
+
+	w.WriteHeader(http.StatusOK)
 }
 
 // Delete transaction to dynamodb

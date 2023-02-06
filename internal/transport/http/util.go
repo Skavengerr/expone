@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -13,15 +12,12 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func getIdFromRequest(r *http.Request) (int64, error) {
+func getIdFromRequest(r *http.Request) (string, error) {
 	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars["id"], 10, 64)
-	if err != nil {
-		return 0, err
-	}
+	id := vars["id"]
 
-	if id == 0 {
-		return 0, errors.New("id can't be 0")
+	if id == "" {
+		return "", errors.New("id can't be 0")
 	}
 
 	return id, nil

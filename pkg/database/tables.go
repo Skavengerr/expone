@@ -34,6 +34,8 @@ func CreateTableAccounts(dynamo *dynamodb.DynamoDB) {
 		TableName: tableName,
 	})
 
+	fmt.Println("Created the table", result)
+
 	if err != nil {
 		util.HandleAWSError(err)
 		return

@@ -27,7 +27,7 @@ func (h *Handler) accountCreate(w http.ResponseWriter, r *http.Request) {
 	account.Balance = 0
 	account.AccountID = uuid.New().String()
 
-	h.services.Account.Insert(account)
+	h.services.Account.Create(account)
 }
 
 func (h *Handler) accountDelete(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,7 @@ func (h *Handler) accountDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if id == 0 {
+	if id == "" {
 		log.Println("deleteBook() error: id is empty")
 		sendErrorResponse(w, http.StatusBadRequest, "Error: Id should not be empty")
 
