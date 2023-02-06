@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/Skavengerr/expone/config"
 	"github.com/Skavengerr/expone/internal/repository"
 	"github.com/Skavengerr/expone/internal/service"
 	delivery "github.com/Skavengerr/expone/internal/transport/http"
@@ -14,17 +14,18 @@ import (
 )
 
 func main() {
-	dynamo := database.InitDb()
+	cfg, err := config.InitViper(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dynamo := database.InitDb(cfg)
 
 	startServer(dynamo)
 }
 
-// Initialize http server
 func startServer(dynamo *dynamodb.DynamoDB) {
-	// init deps
 	repos := repository.NewRepositories(dynamo)
 	services := service.NewServices(repos)
-	fmt.Println("services", services)
 	handlers := delivery.NewHandler(services)
 
 	srv := &http.Server{
