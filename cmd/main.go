@@ -1,39 +1,35 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/Skavengerr/expone/internal/repository"
-	"github.com/Skavengerr/expone/internal/transport"
+	"github.com/Skavengerr/expone/internal/service"
+	delivery "github.com/Skavengerr/expone/internal/transport/http"
 	"github.com/Skavengerr/expone/pkg/database"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-)
-
-var (
-	currentDate = time.Now().Local().Format("2006-01-02")
 )
 
 func main() {
 	dynamo := database.InitDb()
 
-	//mockAddExpenses(dynamo)
 	startServer(dynamo)
-
 }
 
 // Initialize http server
 func startServer(dynamo *dynamodb.DynamoDB) {
+	// init deps
+	repos := repository.NewRepositories(dynamo)
+	services := service.NewServices(repos)
+	fmt.Println("services", services)
+	handlers := delivery.NewHandler(services)
 
-	// init handler
-	repo := repository.NewExpenses(dynamo)
-	handler := transport.NewHandler(repo)
-
-	// init & run server
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: handler.InitRouter(),
+		Handler: handlers.InitRouter(),
 	}
 
 	log.Println("SERVER STARTED AT", time.Now().Format(time.RFC3339))

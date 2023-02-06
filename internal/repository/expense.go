@@ -3,24 +3,24 @@ package repository
 import (
 	"strconv"
 
-	"github.com/Skavengerr/expone/pkg/model"
+	"github.com/Skavengerr/expone/internal/domain"
 	"github.com/Skavengerr/expone/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-type Expenses struct {
+type ExpensesRepo struct {
 	db *dynamodb.DynamoDB
 }
 
-func NewExpenses(db *dynamodb.DynamoDB) *Expenses {
-	return &Expenses{db}
+func NewExpensesRepo(db *dynamodb.DynamoDB) *ExpensesRepo {
+	return &ExpensesRepo{db}
 }
 
 // Insert expense to dynamodb
-func (e *Expenses) Insert(expense model.Expense) {
+func (e *ExpensesRepo) Insert(expense domain.ExpenseInput) error {
 	_, err := e.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String(model.TABLE_EXPENSE),
+		TableName: aws.String(TABLE_EXPENSE),
 		Item: map[string]*dynamodb.AttributeValue{
 			"account_id": {
 				S: aws.String(expense.AccountID),
@@ -48,14 +48,15 @@ func (e *Expenses) Insert(expense model.Expense) {
 
 	if err != nil {
 		util.HandleAWSError(err)
-		return
 	}
+
+	return err
 }
 
 // Update expense to dynamodb
-func (e *Expenses) Update(expense model.Expense) {
+func (e *ExpensesRepo) Update(expense domain.ExpenseInput) error {
 	_, err := e.db.UpdateItem(&dynamodb.UpdateItemInput{
-		TableName: aws.String(model.TABLE_EXPENSE),
+		TableName: aws.String(TABLE_EXPENSE),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account_id": {
 				S: aws.String(expense.AccountID),
@@ -83,15 +84,16 @@ func (e *Expenses) Update(expense model.Expense) {
 
 	if err != nil {
 		util.HandleAWSError(err)
-		return
 	}
+
+	return err
 
 }
 
 // Delete expense from dynamodb
-func (e *Expenses) Delete(expense model.Expense) {
+func (e *ExpensesRepo) Delete(expense domain.ExpenseInput) error {
 	_, err := e.db.DeleteItem(&dynamodb.DeleteItemInput{
-		TableName: aws.String(model.TABLE_EXPENSE),
+		TableName: aws.String(TABLE_EXPENSE),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account_id": {
 				S: aws.String(expense.AccountID),
@@ -101,6 +103,7 @@ func (e *Expenses) Delete(expense model.Expense) {
 
 	if err != nil {
 		util.HandleAWSError(err)
-		return
 	}
+
+	return err
 }

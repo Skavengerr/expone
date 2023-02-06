@@ -1,6 +1,6 @@
-package model
+package domain
 
-type Expense struct {
+type ExpenseInput struct {
 	Date          string `json:"date" dynamodbav:"date"`
 	Amount        int    `json:"amount" dynamodbav:"amount"`
 	Category      string `json:"category" dynamodbav:"category"`
@@ -10,15 +10,4 @@ type Expense struct {
 	Currency      string `json:"currency" dynamodbav:"currency"`
 }
 
-type Income = Expense
-
-type Accounts struct {
-	AccountID string `json:"account_id" dynamodbav:"account_id"`
-	Balance   int    `json:"balance" dynamodbav:"balance"`
-}
-
-const (
-	TABLE_EXPENSE  = "expense"
-	TABLE_INCOME   = "income"
-	TABLE_ACCOUNTS = "accounts"
-)
+type UpdateExpenseInput = ExpenseInput
