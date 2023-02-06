@@ -11,7 +11,7 @@ import (
 
 type Account interface {
 	Create(account domain.AccountInput) error
-	UpdateBalance(account domain.UpdateAccountInput) error
+	Get(id string) string
 	Delete(id int64) error
 }
 
@@ -44,29 +44,29 @@ func (e *AccountRepo) Create(account domain.AccountInput) error {
 	return err
 }
 
-// Update account's balance to dynamodb
-func (e *AccountRepo) UpdateBalance(account domain.UpdateAccountInput) error {
-	_, err := e.db.UpdateItem(&dynamodb.UpdateItemInput{
+// Get account from dynamodb
+func (e *AccountRepo) Get(id string) string {
+	account, err := e.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(TABLE_ACCOUNTS),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account_id": {
-				S: aws.String(account.AccountID),
+				S: aws.String(id),
 			},
 		},
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":balance": {
-				N: aws.String(strconv.Itoa(account.Balance)),
-			},
-		},
-		UpdateExpression: aws.String("set balance=:balance"),
 	})
-
 	if err != nil {
 		util.HandleAWSError(err)
+		return ""
 	}
 
-	return err
+	// check if Item is nil
+	if account.Item == nil {
+		return ""
+	}
 
+	accountID := account.Item["account_id"].S
+
+	return *accountID
 }
 
 // Delete account from dynamodb

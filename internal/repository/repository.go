@@ -5,19 +5,18 @@ import (
 )
 
 const (
-	TABLE_ACCOUNTS = "accounts"
-	TABLE_EXPENSE  = "expense"
-	TABLE_INCOME   = "income"
+	TABLE_ACCOUNTS     = "accounts"
+	TABLE_TRANSACTIONS = "transaction"
 )
 
 type Repositories struct {
-	Account Account
-	Expense Expense
+	Account     Account
+	Transaction Transaction
 }
 
 func NewRepositories(dynamo *dynamodb.DynamoDB) *Repositories {
 	return &Repositories{
-		Account: NewAccountRepo(dynamo),
-		Expense: NewExpensesRepo(dynamo),
+		Account:     NewAccountRepo(dynamo),
+		Transaction: NewTransactionsRepo(dynamo),
 	}
 }

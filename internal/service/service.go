@@ -5,16 +5,16 @@ import (
 )
 
 type Services struct {
-	Account Account
-	Expense Expense
+	Account     Account
+	Transaction Transaction
 }
 
 func NewServices(repo *repository.Repositories) *Services {
-	expenseService := NewExpenseService(repo.Expense)
+	transactionService := NewTransactionService(repo.Transaction)
 	accountService := NewAccountService(repo.Account)
 
 	return &Services{
-		Account: accountService,
-		Expense: expenseService,
+		Account:     accountService,
+		Transaction: transactionService,
 	}
 }

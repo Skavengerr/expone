@@ -7,7 +7,7 @@ import (
 
 type Account interface {
 	Insert(account domain.AccountInput) error
-	Update(account domain.UpdateAccountInput) error
+	Get(id string) string
 	Delete(id int64) error
 }
 
@@ -26,8 +26,8 @@ func (s *AccountService) Insert(account domain.AccountInput) error {
 	})
 }
 
-func (s *AccountService) Update(account domain.UpdateAccountInput) error {
-	return s.repo.UpdateBalance(account)
+func (s *AccountService) Get(id string) string {
+	return s.repo.Get(id)
 }
 
 func (s *AccountService) Delete(id int64) error {

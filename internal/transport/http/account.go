@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -14,7 +13,6 @@ import (
 // init account router
 func initAccountRouter(accountRouter *mux.Router, h *Handler) {
 	accountRouter.HandleFunc("/create", h.accountCreate).Methods(http.MethodPost)
-	accountRouter.HandleFunc("/{id:[0-9]+}", h.accountUpdateBalance).Methods(http.MethodPatch)
 	accountRouter.HandleFunc("/{id:[0-9]+}", h.accountDelete).Methods(http.MethodDelete)
 }
 
@@ -26,30 +24,10 @@ func (h *Handler) accountCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if account.Name == "" {
-		log.Println("createAccount() error: name is empty")
-		sendErrorResponse(w, http.StatusBadRequest, "Error: name is empty")
-
-		return
-	}
-
 	account.Balance = 0
 	account.AccountID = uuid.New().String()
 
 	h.services.Account.Insert(account)
-}
-
-func (h *Handler) accountUpdateBalance(w http.ResponseWriter, r *http.Request) {
-	var account domain.UpdateAccountInput
-
-	if account.AccountID == "" || account.Balance == 0 {
-		log.Println("updateAccountBalance() error: accountID or balance is empty")
-		sendErrorResponse(w, http.StatusBadRequest, "Error: accountID or balance is empty")
-
-		return
-	}
-
-	h.services.Account.Update(account)
 }
 
 func (h *Handler) accountDelete(w http.ResponseWriter, r *http.Request) {

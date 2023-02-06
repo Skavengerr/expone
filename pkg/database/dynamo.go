@@ -14,6 +14,7 @@ var dynamo *dynamodb.DynamoDB
 
 func InitDb(cfg config.Config) *dynamodb.DynamoDB {
 	dynamo = connectDynamoDB(cfg)
+	InitTables(dynamo)
 
 	return dynamo
 }
